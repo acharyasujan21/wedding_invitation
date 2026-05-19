@@ -135,12 +135,15 @@
   @keyframes spinCCW { to { transform: rotate(-360deg); } }
   @keyframes spinSlow{ to { transform: rotate(360deg); } }
 
-  /* couple silhouette — centerpiece of bottom row */
+  /* couple photo — centerpiece of bottom row */
   .couple {
-    flex: 0 0 210px;
-    width: 210px; height: 350px;
+    flex: 0 0 220px;
+    width: 220px; height: 380px;
     z-index: 3;
     align-self: flex-end;
+    object-fit: contain;
+    object-position: bottom center;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
   }
   @keyframes coupleIn { to { opacity: 0.9; } }
 
@@ -148,7 +151,7 @@
   .content {
     position: absolute; inset: 0;
     z-index: 6;
-    padding: 120px 50px 50px;
+    padding: 90px 50px 30px;
     display: flex; flex-direction: column;
     gap: 0;
   }
@@ -195,17 +198,17 @@
     line-height: 1.55;
     letter-spacing: 0.5px;
   }
-  .b1 .ganesh { font-size: 40px; opacity: 0.95; margin-bottom: 8px; }
-  .b1 .mantra { font-size: 32px; opacity: 0.92; }
+  .b1 .ganesh { font-size: 44px; opacity: 0.95; margin-bottom: 8px; }
+  .b1 .mantra { font-size: 34px; opacity: 0.92; }
 
   /* Block 2 + 3 wrapped */
   .b2 {
     text-align: center;
-    margin-top: 30px;
+    margin-top: 22px;
   }
   .b2 .title {
     font-family: 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
-    font-size: 108px;
+    font-size: 116px;
     color: var(--gold-bright);
     letter-spacing: 6px;
     text-shadow: 0 0 24px rgba(240,207,110,0.25), 0 2px 0 rgba(0,0,0,0.4);
@@ -228,17 +231,17 @@
   }
 
   .b3 {
-    margin-top: 32px;
+    margin-top: 22px;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 26px;
+    gap: 24px;
     white-space: nowrap;
   }
   .b3 .name {
     font-family: 'Tiro Devanagari Sanskrit', serif;
-    font-size: 56px;
+    font-size: 60px;
     color: var(--gold-bright);
     font-weight: 600;
     text-shadow: 0 0 16px rgba(240,207,110,0.20);
@@ -247,7 +250,7 @@
     flex: 0 0 auto;
   }
   .b3 .ganesh-icon {
-    width: 92px; height: 92px;
+    width: 96px; height: 96px;
     display: grid; place-items: center;
     flex: 0 0 auto;
   }
@@ -255,59 +258,59 @@
 
   /* Block 4: invitation body */
   .b4 {
-    margin-top: 32px;
+    margin-top: 24px;
     text-align: center;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.55;
-    font-size: 30px;
+    line-height: 1.5;
+    font-size: 32px;
     padding: 0 20px;
   }
   .b4 .role { color: var(--gold-bright); font-weight: 600; }
   .b4 .person { color: var(--gold-bright); }
   .b4 .sub {
     display: block;
-    font-size: 24px;
+    font-size: 26px;
     color: rgba(255,244,220,0.85);
     font-style: italic;
-    margin-top: 4px;
+    margin-top: 3px;
   }
-  .b4 .gap { height: 14px; }
-  .b4 .body { margin-top: 16px; font-size: 28px; line-height: 1.5; }
+  .b4 .gap { height: 10px; }
+  .b4 .body { margin-top: 14px; font-size: 30px; line-height: 1.5; }
 
   /* Block 5: event details (centered) */
   .b5 {
-    margin-top: 36px;
+    margin-top: 26px;
     text-align: center;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.5;
+    line-height: 1.45;
   }
   .b5 h3 {
     font-family: 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
     color: var(--gold-bright);
-    font-size: 44px;
-    margin: 0 0 16px;
+    font-size: 46px;
+    margin: 0 0 14px;
     letter-spacing: 1px;
     text-shadow: 0 0 14px rgba(240,207,110,0.18);
   }
-  .b5 .event-row { margin-bottom: 14px; }
+  .b5 .event-row { margin-bottom: 12px; }
   .b5 .lbl {
     color: var(--gold-bright);
     font-weight: 600;
+    font-size: 32px;
+  }
+  .b5 .val { font-size: 30px; color: var(--cream); }
+  .b5 .place { font-size: 27px; color: rgba(255,244,220,0.90); display: block; margin-top: 2px; }
+  .b5 .contact {
+    margin-top: 10px;
     font-size: 30px;
   }
-  .b5 .val { font-size: 28px; color: var(--cream); }
-  .b5 .place { font-size: 26px; color: rgba(255,244,220,0.90); display: block; margin-top: 3px; }
-  .b5 .contact {
-    margin-top: 12px;
-    font-size: 28px;
-  }
-  .b5 .contact .lbl { font-size: 28px; }
+  .b5 .contact .lbl { font-size: 30px; }
 
   /* Decorative divider between events and bottom row */
   .divider {
-    margin: 28px auto 0;
+    margin: 20px auto 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -328,7 +331,7 @@
 
   /* Bottom row: well-wishers | silhouette | inviter */
   .bottom-row {
-    margin-top: 28px;
+    margin-top: 22px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -340,21 +343,21 @@
     flex: 1 1 0;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.45;
+    line-height: 1.35;
     text-align: left;
-    max-width: 520px;
+    max-width: 540px;
   }
   .b6 .hdr {
     color: var(--gold-bright);
     font-family: 'Yatra One', serif;
-    font-size: 34px;
+    font-size: 36px;
     letter-spacing: 1px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .b6 .row {
-    font-size: 24px;
+    font-size: 25px;
     color: rgba(255,244,220,0.94);
-    margin-bottom: 7px;
+    margin-bottom: 5px;
   }
   .b6 .row .k { color: var(--gold-bright); font-weight: 600; }
 
@@ -363,19 +366,19 @@
     flex: 0 0 auto;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     text-align: left;
-    min-width: 270px;
+    min-width: 280px;
   }
   .b7 .hdr {
     color: var(--gold-bright);
     font-family: 'Yatra One', serif;
-    font-size: 34px;
+    font-size: 36px;
     letter-spacing: 1px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .b7 .name {
     color: var(--gold-bright);
     font-size: 30px;
-    line-height: 1.45;
+    line-height: 1.4;
   }
 
   /* corner filigree accents */
@@ -408,7 +411,7 @@
   .replay:hover { opacity: 1; }
 </style>
 </head>
-<body>
+<body style="background-color: rgb(76, 114, 69)">
 
 <div class="stage">
   <div class="canvas" id="canvas">
@@ -435,10 +438,10 @@
     <div class="content">
 
       <!-- Block 1: Mantras -->
-      <div class="b1 block" style="animation-delay:1.0s" data-fade>
-        <div class="ganesh">श्री गणेशाय नमः</div>
-        <div class="mantra">मंगलम् भगवान् विष्णुः मंगलम् गरुडध्वजः ।</div>
-        <div class="mantra">मंगलम् पुण्डरीकाक्षः मंगलाय तनोहरिः ।।</div>
+      <div class="b1 block" style="animation-delay: 1.0s; font-size: 30px" data-fade>
+        <div class="ganesh" style="font-size: 30px">श्री गणेशाय नमः</div>
+        <div class="mantra" style="font-size: 30px">मंगलम् भगवान् विष्णुः मंगलम् गरुडध्वजः ।</div>
+        <div class="mantra" style="font-size: 30px">मंगलम् पुण्डरीकाक्षः मंगलाय तनोहरिः ।।</div>
       </div>
 
       <!-- Block 2: Main Title -->
@@ -453,27 +456,27 @@
 
       <!-- Block 3: Couple Names -->
       <div class="b3 block" style="animation-delay:3.2s" data-fade>
-        <div class="name">सुजन आचार्य</div>
+        <div class="name" style="font-size: 70px">सुजन आचार्य</div>
         <div class="ganesh-icon" id="ganeshIcon"></div>
-        <div class="name">निहारिका भट्टराई</div>
+        <div class="name" style="font-size: 70px">निहारिका भट्टराई</div>
       </div>
 
       <!-- Block 4: Invitation body -->
       <div class="b4 block" style="animation-delay:4.4s" data-fade>
         <div>
-          <span class="role">वर:</span>
-          <span class="person">चि. श्री सुजन आचार्य</span>
-          <span class="sub">(सुपुत्रः श्री ध्रुव प्रसाद आचार्य एवम् श्रीमती मल्लिका आचार्य, सूर्यविनायक, भक्तपुर)</span>
+          <span class="role" style="font-size: 34px">वर:</span>
+          <span class="person" style="font-size: 34px">चि. श्री सुजन आचार्य</span>
+          <span class="sub" style="font-size: 28px">(सुपुत्रः श्री ध्रुव प्रसाद आचार्य एवम् श्रीमती मल्लिका आचार्य, सूर्यविनायक, भक्तपुर)</span>
         </div>
         <div class="gap"></div>
         <div style="margin-top:4px;">को शुभविवाह</div>
         <div class="gap"></div>
         <div>
-          <span class="role">वधु:</span>
-          <span class="person">आ. निहारिका भट्टराई</span>
-          <span class="sub">(सुपुत्रीः श्री लक्ष्मी प्रसाद भट्टराई एवम् श्रीमती झल्का देवी भट्टराई, सूर्यविनायक, भक्तपुर)</span>
+          <span class="role" style="font-size: 34px">वधु:</span>
+          <span class="person" style="font-size: 34px">आ. निहारिका भट्टराई</span>
+          <span class="sub" style="font-size: 28px">(सुपुत्रीः श्री लक्ष्मी प्रसाद भट्टराई एवम् श्रीमती झल्का देवी भट्टराई, सूर्यविनायक, भक्तपुर)</span>
         </div>
-        <div class="body">
+        <div class="body" style="font-size: 35px">
           का साथ सु-सम्पन्न हुने भएकोले उक्त सुखद उपलक्ष्यमा उपस्थित भई वर-वधुलाई आशिर्वाद प्रदान गरिदिनुहुन यहाँको गरिमामय उपस्थितिका लागि हार्दिक आमन्त्रण गर्दछौं ।
         </div>
       </div>
@@ -482,14 +485,14 @@
       <div class="b5 block" style="animation-delay:6.0s" data-fade>
         <h3>वैवाहिक कार्यक्रम</h3>
         <div class="event-row">
-          <div><span class="lbl">जन्ती प्रस्थान:</span> <span class="val">२०८३ असार २३ गते (July 7, 2026), बिहान १० बजे</span></div>
-          <span class="place">स्थान: आफ्नै निवासबाट (सूर्यविनायक, भक्तपुर)</span>
+          <div><span class="lbl" style="font-size: 42px">जन्ती प्रस्थान:</span> <span class="val" style="font-size: 34px">२०८३ असार २३ गते (July 7, 2026), बिहान १० बजे</span></div>
+          <span class="place" style="font-size: 31px">स्थान: आफ्नै निवासबाट (सूर्यविनायक, भक्तपुर)</span>
         </div>
         <div class="event-row">
-          <div><span class="lbl">प्रीति भोज:</span> <span class="val">२०८३ असार २४ गते (July 8, 2026), बेलुका ५ बजे</span></div>
-          <span class="place">स्थान: क्विन्स प्यालेस इभेन्ट्स (Queens Palace Events), सुकेधारा, काठमाडौं</span>
+          <div><span class="lbl" style="font-size: 42px">प्रीति भोज:</span> <span class="val" style="font-size: 34px">२०८३ असार २४ गते (July 8, 2026), बेलुका ५ बजे</span></div>
+          <span class="place" style="font-size: 31px">स्थान: क्विन्स प्यालेस इभेन्ट्स (Queens Palace Events), सुकेधारा, काठमाडौं</span>
         </div>
-        <div class="contact"><span class="lbl">सम्पर्क:</span> <span class="val">९८५१२३३१४५, ९८५१०५५७९१</span></div>
+        <div class="contact"><span class="lbl" style="font-size: 32px">सम्पर्क:</span> <span class="val" style="font-size: 31px">९८५१२३३१४५, ९८५१०५५७९१</span></div>
       </div>
 
       <!-- Decorative divider -->
@@ -501,7 +504,7 @@
 
       <!-- Bottom row: well-wishers | silhouette | inviter -->
       <div class="bottom-row">
-        <div class="b6 block" style="animation-delay:7.8s" data-fade>
+        <div class="b6 block" style="animation-delay: 7.8s; width: 45px" data-fade>
           <div class="hdr">दर्शनाभिलाषी:</div>
           <div class="row"><span class="k">हजुरबुबा/हजुरआमा:</span> स्व. राम प्रसाद आचार्य / श्रीमती सावित्री आचार्य</div>
           <div class="row"><span class="k">काका/काकी:</span> श्री यादव प्रसाद आचार्य / देवी आचार्य</div>
@@ -513,12 +516,12 @@
           <div class="row" style="margin-top:6px; font-style:italic;">(एवं समस्त आचार्य परिवार)</div>
         </div>
 
-        <svg class="couple block" viewBox="0 0 230 380" id="couple" style="animation-delay:8.4s" data-fade></svg>
+        <img class="couple block" src="couple.png" alt="Bride and Groom" style="animation-delay: 8.4s; opacity: 0; object-fit: fill; width: 220px" data-fade>
 
         <div class="b7 block" style="animation-delay:9.0s" data-fade>
-          <div class="hdr">प्रार्थी:</div>
-          <div class="name">श्री ध्रुव प्रसाद आचार्य</div>
-          <div class="name">श्रीमती मल्लिका आचार्य</div>
+          <div class="hdr" style="text-align: right; font-size: 38px">प्रार्थी:</div>
+          <div class="name" style="text-align: right; font-size: 34px">श्री ध्रुव प्रसाद आचार्य</div>
+          <div class="name" style="text-align: right; font-size: 34px">श्रीमती मल्लिका आचार्य</div>
         </div>
       </div>
     </div>
@@ -552,7 +555,6 @@
   document.getElementById('mandala').innerHTML = buildMandala();
   document.getElementById('ghost').innerHTML   = buildGhostMandala();
   document.getElementById('topborder').innerHTML = buildTopBorder(4800, 120);
-  document.getElementById('couple').innerHTML  = buildCouple();
   document.getElementById('ganeshIcon').innerHTML = buildGanesh();
   document.getElementById('cornerTL').innerHTML = buildCorner();
   document.getElementById('cornerTR').innerHTML = buildCorner();
