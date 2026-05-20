@@ -955,6 +955,58 @@
     50%      { transform: scale(1.15); }
   }
 
+  /* ============================================================
+     NEXT CTA — appears after a few seconds of inactivity on auto-advance scenes
+     ============================================================ */
+  .next-cta {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%) translateY(8px);
+    z-index: 1100;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 28px;
+    background: linear-gradient(170deg, rgba(240,207,110,0.22), rgba(212,175,55,0.12));
+    border: 1.5px solid var(--gold);
+    border-radius: 36px;
+    color: var(--gold-bright);
+    font-family: 'Tiro Devanagari Sanskrit', 'Cormorant Garamond', serif;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 0 18px rgba(240,207,110,0.25), inset 0 0 12px rgba(240,207,110,0.08);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out, box-shadow 0.2s;
+  }
+  .next-cta[hidden] { display: none; }
+  .next-cta.is-shown {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+    animation: nextPulse 2.4s ease-in-out infinite;
+  }
+  .next-cta:hover {
+    box-shadow: 0 0 26px rgba(240,207,110,0.5), inset 0 0 16px rgba(240,207,110,0.18);
+  }
+  .next-cta-label {
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+  }
+  .next-cta-sub {
+    font-size: 12px;
+    font-style: italic;
+    color: rgba(255,244,220,0.75);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  @keyframes nextPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(240,207,110,0.25), inset 0 0 12px rgba(240,207,110,0.08); }
+    50%      { box-shadow: 0 0 28px rgba(240,207,110,0.55), inset 0 0 18px rgba(240,207,110,0.2); }
+  }
+
   /* play overlay (dismissed on click; only if autoplay blocked) */
   .replay {
     position: fixed;
@@ -980,6 +1032,12 @@
 <audio id="bgMusic" src="music.mp3.mpeg" loop preload="auto" type="audio/mpeg"></audio>
 <button class="music-toggle" id="musicToggle" type="button" aria-label="Toggle background music" title="Toggle music">
   <span class="music-icon" id="musicIcon">♪</span>
+</button>
+
+<!-- Nudge CTA: appears after a few seconds of inactivity on scenes that auto-advance -->
+<button class="next-cta" id="nextCta" type="button" hidden>
+  <span class="next-cta-label">अगाडि बढ्नुहोस्</span>
+  <span class="next-cta-sub">tap to continue</span>
 </button>
 
 <!-- Personalized intro: envelope with recipient name (from ?to= URL param) -->
@@ -1355,7 +1413,38 @@
      7. SCENE NAVIGATION — tap to advance, back arrow, dots, keyboard
      ============================================================ */
   const TOTAL_SCENES = 3;
+  const CTA_DELAY_MS  =  8000;    // show "Next" button after this much inactivity
+  const AUTO_NEXT_MS  = 30000;    // auto-advance to next scene after this much
   let currentScene = 1;
+
+  const nextCta = document.getElementById('nextCta');
+  let ctaTimer = null;
+  let autoTimer = null;
+
+  function clearSceneTimers() {
+    if (ctaTimer)  { clearTimeout(ctaTimer);  ctaTimer = null; }
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    nextCta.classList.remove('is-shown');
+    nextCta.hidden = true;
+  }
+
+  function armSceneTimers(n) {
+    clearSceneTimers();
+    // Last scene: no nudge, no auto-advance — let the reader linger
+    if (n >= TOTAL_SCENES) return;
+
+    ctaTimer = setTimeout(() => {
+      nextCta.hidden = false;
+      // small reflow so the transition fires
+      void nextCta.offsetWidth;
+      nextCta.classList.add('is-shown');
+    }, CTA_DELAY_MS);
+
+    autoTimer = setTimeout(() => {
+      // user never advanced — move them along
+      showScene(currentScene + 1);
+    }, AUTO_NEXT_MS);
+  }
 
   function showScene(n) {
     n = Math.max(1, Math.min(TOTAL_SCENES, n));
@@ -1378,8 +1467,9 @@
     document.getElementById('navBack').hidden = (n === 1);
     document.getElementById('navFwd').hidden  = (n === TOTAL_SCENES);
 
-    // animate the new scene
+    // animate the new scene + arm the nudge / auto-advance timers
     startSceneAnimations(n);
+    armSceneTimers(n);
   }
 
   document.getElementById('navFwd').addEventListener('click',  () => showScene(currentScene + 1));
@@ -1393,6 +1483,11 @@
   // Tap-to-advance anywhere on the active scene (but not on links/buttons)
   document.querySelector('.content').addEventListener('click', (e) => {
     if (e.target.closest('a, button, .nav-arrow, .dot')) return;
+    if (currentScene < TOTAL_SCENES) showScene(currentScene + 1);
+  });
+
+  // Bottom-center nudge button: clicking advances exactly like any other nav
+  nextCta.addEventListener('click', () => {
     if (currentScene < TOTAL_SCENES) showScene(currentScene + 1);
   });
 
@@ -1468,6 +1563,7 @@
       document.getElementById('navBack').hidden = true;
       document.getElementById('navFwd').hidden  = false;
       startSceneAnimations(1);
+      armSceneTimers(1);          // start the inactivity countdown for the nudge / auto-advance
     }, 500);
     setTimeout(() => intro.classList.add('gone'), 1600);
     setTimeout(() => intro && intro.parentNode && intro.parentNode.removeChild(intro), 2800);
