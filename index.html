@@ -1,13 +1,51 @@
 <!doctype html>
+<!--
+  Personalized wedding invitation.
+  Share per-guest links like:
+    index.html?to=Ramesh%20Dai
+    index.html?to=Sita%20Aunty
+  The ?to= value is shown on the envelope (e.g. "Dear Ramesh Dai").
+  Empty / missing → falls back to "Dear Esteemed Guest".
+-->
 <html lang="ne">
 <head>
 <meta charset="utf-8">
 <title>शुभ विवाह — Sujan & Niharika</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes,viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Yatra+One&family=Eczar:wght@400;500;600;700&family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Yatra+One&family=Eczar:wght@400;500;600;700&family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
+  /* ============================================================
+     Self-hosted magical Devanagari fonts (free, see fonts/README.txt).
+     If the TTF isn't present, browser falls back to the next font in the
+     family stack — so the page never breaks, it just won't show the
+     calligraphic face until the file is dropped into fonts/.
+     ============================================================ */
+  /* The file labelled "BishwaCalligraphy.ttf" actually contains the
+     Sagarmatha font internally — we expose it under both aliases. */
+  @font-face {
+    font-family: 'Bishwa Calligraphy';
+    src: local('Bishwa Calligraphy'),
+         local('Sagarmatha'),
+         url('fonts/BishwaCalligraphy.ttf') format('truetype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'AMS Ganesha';
+    src: local('AMS Ganesha'),
+         local('AMSGanesha'),
+         url('fonts/AMSGanesha.ttf') format('truetype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'AMS Chandrakant';
+    src: local('AMS Chandrakant'),
+         local('AMSChandrakant'),
+         url('fonts/AMSChandrakant.ttf') format('truetype');
+    font-display: swap;
+  }
+
   :root {
     /* kaleji = deep liver red */
     --bg-deepest: #15040a;
@@ -27,8 +65,10 @@
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    background: #000;
-    overflow: hidden;
+    background: #15040a;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     font-family: 'Tiro Devanagari Sanskrit', 'Eczar', serif;
     color: var(--cream);
     -webkit-font-smoothing: antialiased;
@@ -36,16 +76,28 @@
   }
 
   .stage {
-    position: fixed; inset: 0;
-    background: #000;
+    /* On mobile: stage flows in document so the page can scroll/pinch-zoom.
+       On wide screens: behaves like the original fixed letterbox. */
+    position: relative;
+    width: 100%;
+    background: #15040a;
     overflow: hidden;
+    touch-action: pan-y pinch-zoom;
+  }
+  @media (min-aspect-ratio: 1/1) {
+    .stage {
+      position: fixed;
+      inset: 0;
+    }
   }
 
-  /* Fixed 1080x1920 design surface */
+  /* Fixed 1080x1920 design surface.
+     On phones: anchored to top-left, width-fit scaled so it extends below
+     the fold and the page scrolls. On desktop/landscape: re-centered via JS. */
   .canvas {
     width: 1080px; height: 1920px;
     position: absolute;
-    left: 50%; top: 50%;
+    left: 0; top: 0;
     overflow: hidden;
     transform-origin: 0 0;
     background:
@@ -137,10 +189,12 @@
 
   /* couple photo — centerpiece of bottom row */
   .couple {
-    flex: 0 0 220px;
-    width: 220px; height: 380px;
+    flex: 0 0 200px;
+    width: 200px;
+    height: auto;
+    max-height: 340px;
     z-index: 3;
-    align-self: flex-end;
+    align-self: flex-end;       /* hug the bottom of the bottom-row */
     object-fit: contain;
     object-position: bottom center;
     filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
@@ -151,7 +205,7 @@
   .content {
     position: absolute; inset: 0;
     z-index: 6;
-    padding: 90px 50px 30px;
+    padding: 90px 50px 80px;   /* more bottom room so प्रार्थी block isn't cut */
     display: flex; flex-direction: column;
     gap: 0;
   }
@@ -198,33 +252,116 @@
     line-height: 1.55;
     letter-spacing: 0.5px;
   }
-  .b1 .ganesh { font-size: 44px; opacity: 0.95; margin-bottom: 8px; }
-  .b1 .mantra { font-size: 34px; opacity: 0.92; }
+  .b1 .ganesh { font-size: 50px; opacity: 0.95; margin-bottom: 10px; }
+  .b1 .mantra { font-size: 40px; opacity: 0.92; }
+  .b1 .om-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    margin-bottom: 10px;
+  }
+  .b1 .om-row .om-svg {
+    width: 78px; height: 78px;
+    filter: drop-shadow(0 0 14px rgba(240,207,110,0.45));
+  }
+  .b1 .om-row .om-line {
+    width: 170px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* clickable venue + phone links inside Devanagari text */
+  .venue-link, .tel-link {
+    color: var(--gold-bright);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(212,175,55,0.55);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .venue-link:hover, .tel-link:hover {
+    color: #fce29a;
+    border-bottom-color: var(--gold-bright);
+  }
+
+  /* countdown chip */
+  .countdown {
+    margin: 28px auto 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 14px 30px;
+    border: 1px solid rgba(212,175,55,0.55);
+    border-radius: 48px;
+    background: rgba(20,5,12,0.55);
+    box-shadow: 0 0 18px rgba(240,207,110,0.12), inset 0 0 12px rgba(240,207,110,0.06);
+  }
+  .countdown .days {
+    font-family: 'AMS Ganesha', 'Yatra One', serif;
+    font-size: 60px;
+    color: var(--gold-bright);
+    line-height: 1;
+    text-shadow: 0 0 14px rgba(240,207,110,0.35);
+  }
+  .countdown .label {
+    font-size: 32px;
+    color: rgba(255,244,220,0.92);
+    letter-spacing: 0.5px;
+  }
+  .countdown.now .days { font-size: 38px; }
+
+  /* gold shimmer pass on completed text */
+  .shimmer { position: relative; overflow: hidden; }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -150%;
+    width: 60%; height: 100%;
+    background: linear-gradient(105deg,
+      transparent 0%,
+      rgba(255,244,220,0) 30%,
+      rgba(255,244,220,0.18) 48%,
+      rgba(240,207,110,0.42) 50%,
+      rgba(255,244,220,0.18) 52%,
+      rgba(255,244,220,0) 70%,
+      transparent 100%);
+    transform: skewX(-18deg);
+    pointer-events: none;
+    opacity: 0;
+  }
+  .shimmer.shimmer-go::after {
+    animation: shimmerSweep 2.2s cubic-bezier(.4,.1,.3,1) forwards;
+  }
+  @keyframes shimmerSweep {
+    0%   { left: -150%; opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { left: 150%; opacity: 0; }
+  }
 
   /* Block 2 + 3 wrapped */
   .b2 {
     text-align: center;
     margin-top: 22px;
+    padding-inline: 40px;  /* keep AMS Ganesha glyphs inside the canvas */
   }
   .b2 .title {
-    font-family: 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
-    font-size: 116px;
+    font-family: 'AMS Ganesha', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
+    font-size: 104px;
     color: var(--gold-bright);
-    letter-spacing: 6px;
+    letter-spacing: 2px;
     text-shadow: 0 0 24px rgba(240,207,110,0.25), 0 2px 0 rgba(0,0,0,0.4);
-    line-height: 1;
+    line-height: 1.05;
   }
   .b2 .swash {
     display: flex; align-items: center; justify-content: center;
-    gap: 18px;
-    margin-top: 14px;
+    gap: 22px;
+    margin-top: 18px;
   }
   .b2 .swash .line {
-    width: 120px; height: 1px;
+    width: 160px; height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
   .b2 .swash .dia {
-    width: 8px; height: 8px;
+    width: 10px; height: 10px;
     background: var(--gold-bright);
     transform: rotate(45deg);
     box-shadow: 0 0 8px rgba(240,207,110,0.7);
@@ -236,21 +373,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    gap: 18px;
     white-space: nowrap;
+    padding-inline: 30px;
+    max-width: 1080px;
   }
   .b3 .name {
-    font-family: 'Tiro Devanagari Sanskrit', serif;
-    font-size: 60px;
+    font-family: 'Bishwa Calligraphy', 'Tiro Devanagari Sanskrit', serif;
+    font-size: 64px;             /* Bishwa runs wide — must stay <= ~440px per name to fit */
     color: var(--gold-bright);
     font-weight: 600;
     text-shadow: 0 0 16px rgba(240,207,110,0.20);
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     white-space: nowrap;
     flex: 0 0 auto;
   }
   .b3 .ganesh-icon {
-    width: 96px; height: 96px;
+    width: 90px; height: 90px;
     display: grid; place-items: center;
     flex: 0 0 auto;
   }
@@ -262,21 +401,22 @@
     text-align: center;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.5;
-    font-size: 32px;
-    padding: 0 20px;
+    line-height: 1.55;
+    font-size: 38px;
+    padding: 0 30px;
+    max-width: 960px;
   }
   .b4 .role { color: var(--gold-bright); font-weight: 600; }
   .b4 .person { color: var(--gold-bright); }
   .b4 .sub {
     display: block;
-    font-size: 26px;
+    font-size: 30px;
     color: rgba(255,244,220,0.85);
     font-style: italic;
-    margin-top: 3px;
+    margin-top: 6px;
   }
-  .b4 .gap { height: 10px; }
-  .b4 .body { margin-top: 14px; font-size: 30px; line-height: 1.5; }
+  .b4 .gap { height: 12px; }
+  .b4 .body { margin-top: 18px; font-size: 36px; line-height: 1.55; }
 
   /* Block 5: event details (centered) */
   .b5 {
@@ -284,29 +424,51 @@
     text-align: center;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.45;
+    line-height: 1.5;
+    max-width: 920px;
   }
   .b5 h3 {
-    font-family: 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
+    font-family: 'AMS Chandrakant', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
     color: var(--gold-bright);
-    font-size: 46px;
-    margin: 0 0 14px;
+    font-size: 64px;
+    margin: 0 0 28px;
     letter-spacing: 1px;
     text-shadow: 0 0 14px rgba(240,207,110,0.18);
   }
-  .b5 .event-row { margin-bottom: 12px; }
+  .b5 .event-row {
+    margin-bottom: 44px;          /* clear break between प्रीति भोज and जन्ती प्रस्थान */
+    line-height: 1.5;
+  }
+  /* first line of each event-row: bold gold label + date */
+  .b5 .event-row > div:first-child {
+    margin-bottom: 14px;          /* explicit gap between "heading line" and स्थान line */
+  }
   .b5 .lbl {
     color: var(--gold-bright);
     font-weight: 600;
-    font-size: 32px;
+    font-size: 46px;
   }
-  .b5 .val { font-size: 30px; color: var(--cream); }
-  .b5 .place { font-size: 27px; color: rgba(255,244,220,0.90); display: block; margin-top: 2px; }
-  .b5 .contact {
+  .b5 .val { font-size: 40px; color: var(--cream); }
+  .b5 .val,
+  .countdown .label,
+  .b5 .place { font-feature-settings: "liga"; }
+  /* English/Latin runs inside Devanagari fields use Cormorant for a wedding feel */
+  .b5 .val,
+  .countdown .label {
+    font-family: 'Tiro Devanagari Sanskrit', 'Cormorant Garamond', serif;
+  }
+  .b5 .place {
+    font-size: 36px;
+    color: rgba(255,244,220,0.90);
+    display: block;
     margin-top: 10px;
-    font-size: 30px;
+    line-height: 1.45;
   }
-  .b5 .contact .lbl { font-size: 30px; }
+  .b5 .contact {
+    margin-top: 32px;             /* more breathing room before contact line */
+    font-size: 38px;
+  }
+  .b5 .contact .lbl { font-size: 40px; }
 
   /* Decorative divider between events and bottom row */
   .divider {
@@ -333,7 +495,7 @@
   .bottom-row {
     margin-top: 22px;
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;   /* anchor to top so right column doesn't slide off-canvas */
     justify-content: space-between;
     gap: 18px;
   }
@@ -343,21 +505,22 @@
     flex: 1 1 0;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.35;
+    line-height: 1.4;
     text-align: left;
     max-width: 540px;
   }
   .b6 .hdr {
     color: var(--gold-bright);
-    font-family: 'Yatra One', serif;
-    font-size: 36px;
+    font-family: 'AMS Chandrakant', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
+    font-size: 48px;
     letter-spacing: 1px;
-    margin-bottom: 10px;
+    margin-bottom: 18px;
   }
   .b6 .row {
-    font-size: 25px;
+    font-size: 28px;
     color: rgba(255,244,220,0.94);
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    line-height: 1.45;
   }
   .b6 .row .k { color: var(--gold-bright); font-weight: 600; }
 
@@ -365,20 +528,21 @@
   .b7 {
     flex: 0 0 auto;
     font-family: 'Tiro Devanagari Sanskrit', serif;
-    text-align: left;
+    text-align: right;
     min-width: 280px;
+    max-width: 380px;
   }
   .b7 .hdr {
     color: var(--gold-bright);
-    font-family: 'Yatra One', serif;
-    font-size: 36px;
+    font-family: 'AMS Chandrakant', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
+    font-size: 48px;
     letter-spacing: 1px;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
   }
   .b7 .name {
     color: var(--gold-bright);
-    font-size: 30px;
-    line-height: 1.4;
+    font-size: 36px;
+    line-height: 1.45;
   }
 
   /* corner filigree accents */
@@ -391,6 +555,412 @@
   }
   .corner.tl { top: 110px; left: 30px; }
   .corner.tr { top: 110px; right: 30px; transform: scaleX(-1); }
+  /* corner accents are tuned for Scene 1's layout; hide on the simpler scenes */
+  .canvas .corner { transition: opacity 0.6s ease-out; }
+  .canvas.scene-2 .corner,
+  .canvas.scene-3 .corner { opacity: 0; }
+
+  /* ============================================================
+     INTRO OVERLAY — envelope-open animation
+     ============================================================ */
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 36px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 40%,
+        rgba(140,30,50,0.65) 0%,
+        rgba(70,15,28,0.30) 50%,
+        transparent 80%),
+      linear-gradient(170deg,
+        var(--bg-mid)   0%,
+        var(--bg-deep)  45%,
+        var(--bg-deepest) 100%);
+    transition: opacity 0.9s ease-out, visibility 0.9s ease-out;
+    perspective: 1200px;
+  }
+  .intro.gone {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* glitter layer (particles injected by JS) */
+  .glitter {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .glitter .spark {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fce29a 0%, #f0cf6e 50%, transparent 80%);
+    box-shadow: 0 0 8px rgba(240,207,110,0.9), 0 0 16px rgba(240,207,110,0.5);
+    opacity: 0;
+    animation: sparkRise var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+  }
+  @keyframes sparkRise {
+    0%   { opacity: 0; transform: translateY(0)    scale(0.4); }
+    15%  { opacity: 1; }
+    50%  { opacity: 1; transform: translateY(-40px) scale(1); }
+    85%  { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-90px) scale(0.6); }
+  }
+
+  /* envelope geometry — sized via vmin so it adapts to any screen */
+  .envelope {
+    position: relative;
+    width: min(86vw, 540px);
+    aspect-ratio: 5 / 3;
+    background: linear-gradient(160deg, #6b1828 0%, #4a0f1c 60%, #2a0710 100%);
+    border: 2px solid var(--gold);
+    border-radius: 6px;
+    box-shadow:
+      0 24px 60px rgba(0,0,0,0.55),
+      0 0 30px rgba(240,207,110,0.18),
+      inset 0 0 30px rgba(0,0,0,0.4);
+    transform-style: preserve-3d;
+    transition: transform 1.4s cubic-bezier(.4,.1,.3,1);
+  }
+  .intro.opening .envelope {
+    transform: translateY(-30px) scale(1.04);
+  }
+
+  /* gold inner border accent */
+  .envelope::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(240,207,110,0.55);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  /* the "Dear <Name>" line — sits in the LOWER half of the envelope so the
+     flap (top 60%) and seal don't cover it. */
+  .env-name {
+    position: absolute;
+    left: 0; right: 0;
+    top: 62%;                /* just below the flap tip */
+    bottom: 8%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 10%;
+    font-family: 'Great Vibes', 'Pinyon Script', cursive;
+    font-size: clamp(28px, 5.6vw, 52px);
+    color: var(--gold-bright);
+    text-shadow: 0 0 14px rgba(240,207,110,0.45), 0 2px 0 rgba(0,0,0,0.4);
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+    transition: opacity 0.5s ease-out;
+    z-index: 1;              /* below the flap (z=2) but above envelope body */
+  }
+  .intro.opening .env-name { opacity: 0; }
+
+  /* triangular flap, hinged at top */
+  .env-flap {
+    position: absolute;
+    top: -1px; left: -1px;
+    width: calc(100% + 2px);
+    height: 60%;
+    background: linear-gradient(170deg, #7a1226 0%, #4a0f1c 60%, #2a0710 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: 50% 0%;
+    transition: transform 1.2s cubic-bezier(.5,.05,.3,1);
+    z-index: 2;
+    border-bottom: 1px solid rgba(240,207,110,0.35);
+  }
+  .env-flap::after {
+    content: "";
+    position: absolute;
+    inset: 6px 6px 0 6px;
+    border-top: 1px solid rgba(240,207,110,0.45);
+    border-left: 1px solid rgba(240,207,110,0.45);
+    border-right: 1px solid rgba(240,207,110,0.45);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    pointer-events: none;
+  }
+  .intro.opening .env-flap {
+    transform: rotateX(-175deg);
+  }
+
+  /* wax seal with OM — small disc sitting where the flap tip closes onto
+     the envelope body. Stays in the upper portion so the name underneath
+     is readable. */
+  .env-seal {
+    position: absolute;
+    top: 56%;                /* near flap tip (flap is 60% tall) */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(44px, 9vw, 64px);
+    height: clamp(44px, 9vw, 64px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fce29a 0%, #d4af37 45%, #8a6018 100%);
+    box-shadow:
+      0 0 14px rgba(240,207,110,0.5),
+      inset -3px -3px 8px rgba(0,0,0,0.35),
+      inset 2px 2px 6px rgba(255,244,220,0.4);
+    display: grid;
+    place-items: center;
+    z-index: 3;
+    transition: opacity 0.4s ease-out, transform 0.6s cubic-bezier(.4,.1,.3,1);
+  }
+  .env-seal::before {
+    content: "ॐ";
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-size: clamp(22px, 5vw, 34px);
+    line-height: 1;
+    color: #4a0f1c;
+    text-shadow: 0 1px 0 rgba(255,244,220,0.4);
+  }
+  .intro.opening .env-seal {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4) rotate(45deg);
+  }
+
+  /* CTA button under envelope */
+  .intro-cta {
+    padding: 14px 36px;
+    background: linear-gradient(170deg, rgba(240,207,110,0.18), rgba(212,175,55,0.10));
+    border: 1.5px solid var(--gold);
+    border-radius: 36px;
+    color: var(--gold-bright);
+    font-family: 'Cormorant Garamond', 'Tiro Devanagari Sanskrit', serif;
+    font-size: clamp(18px, 4.2vw, 24px);
+    font-style: italic;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(240,207,110,0.25), inset 0 0 12px rgba(240,207,110,0.10);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, opacity 0.5s ease-out;
+    animation: ctaPulse 2.4s ease-in-out infinite;
+  }
+  .intro-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 28px rgba(240,207,110,0.45), inset 0 0 16px rgba(240,207,110,0.18);
+  }
+  .intro.opening .intro-cta {
+    opacity: 0;
+    pointer-events: none;
+  }
+  @keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(240,207,110,0.25), inset 0 0 12px rgba(240,207,110,0.10); }
+    50%      { box-shadow: 0 0 32px rgba(240,207,110,0.55), inset 0 0 18px rgba(240,207,110,0.22); }
+  }
+
+  /* ============================================================
+     SCENE SYSTEM — three stacked scenes, cross-fade with gentle lift
+     ============================================================ */
+  .scene {
+    position: absolute;
+    inset: 0;
+    padding: 140px 50px 180px;    /* room for top border + bottom nav dots */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;      /* vertical center */
+    align-items: center;          /* horizontal center */
+    text-align: center;
+    gap: 32px;                    /* even rhythm between blocks */
+    opacity: 0;
+    transform: translateY(24px);
+    pointer-events: none;
+    transition: opacity 0.9s ease-out, transform 0.9s cubic-bezier(.2,.7,.2,1);
+    overflow: hidden;
+  }
+  .scene.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    z-index: 1;
+  }
+  /* Scene blocks reset their own top-margins — the .scene gap controls spacing */
+  .scene > * { margin-top: 0; }
+
+  /* ---- Scene 2 — two stacked rows on top of a faded couple silhouette ---- */
+  .scene[data-scene="2"] {
+    gap: 60px;                    /* extra breathing room between the two blocks */
+  }
+  .scene[data-scene="2"] .b6,
+  .scene[data-scene="2"] .b7 {
+    position: relative;
+    z-index: 2;                   /* above the .family-bg backdrop */
+    max-width: 820px;
+    width: 100%;
+    text-align: center;           /* both rows centered horizontally */
+  }
+  .scene[data-scene="2"] .b6 .hdr,
+  .scene[data-scene="2"] .b7 .hdr {
+    text-align: center;
+  }
+  .scene[data-scene="2"] .b6 .row {
+    text-align: center;
+  }
+  .scene[data-scene="2"] .b7 .name {
+    text-align: center;
+  }
+
+  /* divider between दर्शनाभिलाषी list and प्रार्थी block on Scene 2 */
+  .scene2-divider {
+    position: relative;
+    z-index: 2;
+    width: 60%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* couple silhouette as faded backdrop centered behind the rows */
+  .family-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: 55%;
+    max-height: 1050px;
+    object-fit: contain;
+    object-position: center;
+    opacity: 0.4;
+    z-index: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 0 24px rgba(0,0,0,0.4));
+  }
+
+  /* ============================================================
+     NAVIGATION UI — back/forward arrows + dot indicator
+     ============================================================ */
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    width: 64px; height: 64px;
+    display: grid;
+    place-items: center;
+    background: rgba(20,5,12,0.45);
+    border: 1px solid rgba(212,175,55,0.55);
+    border-radius: 50%;
+    color: var(--gold-bright);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px;
+    line-height: 1;
+    padding-bottom: 4px;          /* visually center the chevron */
+    cursor: pointer;
+    box-shadow: 0 0 16px rgba(240,207,110,0.18);
+    transition: opacity 0.3s, transform 0.2s, box-shadow 0.2s;
+    opacity: 0.85;
+  }
+  .nav-arrow:hover {
+    opacity: 1;
+    box-shadow: 0 0 24px rgba(240,207,110,0.4);
+  }
+  .nav-back { left: 26px; }
+  .nav-fwd  { right: 26px; }
+  .nav-arrow[hidden] { display: none; }
+
+  .nav-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 50px;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+    background: rgba(20,5,12,0.4);
+    border-radius: 24px;
+    border: 1px solid rgba(212,175,55,0.3);
+  }
+  .nav-dots .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255,244,220,0.3);
+    border: 1px solid rgba(212,175,55,0.55);
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+  .nav-dots .dot.is-active {
+    background: var(--gold-bright);
+    transform: scale(1.4);
+    box-shadow: 0 0 10px rgba(240,207,110,0.7);
+  }
+
+  /* ============================================================
+     PER-SCENE MANDALA POSITION VARIATIONS — same motif glides between scenes
+     ============================================================ */
+  .canvas .mandala,
+  .canvas .ghost {
+    transition: transform 1s cubic-bezier(.4,.1,.3,1), opacity 1s ease-out;
+  }
+  /* Scene 1: default — mandala bottom-right, ghost center */
+  /* (existing CSS already covers this) */
+
+  /* Scene 2: mandala centered and slightly smaller behind the family columns */
+  .canvas.scene-2 .mandala {
+    transform: translate(180px, 230px) scale(0.78);
+    opacity: 0.55;
+  }
+  .canvas.scene-2 .ghost { opacity: 0.06; }
+
+  /* Scene 3: mandala small at the top center, like an emblem */
+  .canvas.scene-3 .mandala {
+    transform: translate(-100px, -1180px) scale(0.42);
+    opacity: 0.6;
+  }
+  .canvas.scene-3 .ghost { opacity: 0.04; }
+
+  /* ============================================================
+     YOUTUBE BACKGROUND MUSIC — hidden iframe + visible mute toggle
+     ============================================================ */
+  #ytWrap {
+    position: fixed;
+    width: 1px; height: 1px;
+    left: -9999px; top: -9999px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .music-toggle {
+    position: fixed;
+    left: 16px; bottom: 16px;
+    z-index: 1100;             /* above envelope intro */
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    background: rgba(20,5,12,0.65);
+    color: var(--gold-bright);
+    font-size: 22px;
+    cursor: pointer;
+    display: grid; place-items: center;
+    box-shadow: 0 0 14px rgba(240,207,110,0.25);
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+    opacity: 0.85;
+  }
+  .music-toggle:hover {
+    opacity: 1;
+    transform: scale(1.06);
+    box-shadow: 0 0 22px rgba(240,207,110,0.5);
+  }
+  .music-toggle.is-playing {
+    background: rgba(212,175,55,0.18);
+    box-shadow: 0 0 18px rgba(240,207,110,0.45), inset 0 0 8px rgba(240,207,110,0.2);
+  }
+  .music-toggle.is-playing .music-icon {
+    animation: musicPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes musicPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.15); }
+  }
 
   /* play overlay (dismissed on click; only if autoplay blocked) */
   .replay {
@@ -411,7 +981,26 @@
   .replay:hover { opacity: 1; }
 </style>
 </head>
-<body style="background-color: rgb(76, 114, 69)">
+<body style="background-color: #15040a">
+
+<!-- Hidden YouTube background music. Swap the videoId in the script (8. MUSIC) to change track. -->
+<div id="ytWrap" aria-hidden="true">
+  <div id="ytPlayer"></div>
+</div>
+<button class="music-toggle" id="musicToggle" type="button" aria-label="Toggle background music" title="Toggle music">
+  <span class="music-icon" id="musicIcon">♪</span>
+</button>
+
+<!-- Personalized intro: envelope with recipient name (from ?to= URL param) -->
+<div class="intro" id="intro" role="dialog" aria-label="Wedding invitation">
+  <div class="glitter" id="glitter" aria-hidden="true"></div>
+  <div class="envelope" id="envelope">
+    <div class="env-name" id="envName">Dear Guest</div>
+    <div class="env-flap"></div>
+    <div class="env-seal" aria-hidden="true"></div>
+  </div>
+  <button class="intro-cta" id="introCta" type="button">OPEN INVITATION</button>
+</div>
 
 <div class="stage">
   <div class="canvas" id="canvas">
@@ -434,14 +1023,33 @@
       <svg viewBox="0 0 4800 120" preserveAspectRatio="none" id="topborder"></svg>
     </div>
 
-    <!-- Content -->
+    <!-- Content — split into three sequential scenes -->
     <div class="content">
 
+    <!-- ============== SCENE 1 — The Announcement ============== -->
+    <section class="scene is-active" data-scene="1">
+
       <!-- Block 1: Mantras -->
-      <div class="b1 block" style="animation-delay: 1.0s; font-size: 30px" data-fade>
-        <div class="ganesh" style="font-size: 30px">श्री गणेशाय नमः</div>
-        <div class="mantra" style="font-size: 30px">मंगलम् भगवान् विष्णुः मंगलम् गरुडध्वजः ।</div>
-        <div class="mantra" style="font-size: 30px">मंगलम् पुण्डरीकाक्षः मंगलाय तनोहरिः ।।</div>
+      <div class="b1 block" style="animation-delay: 1.0s" data-fade>
+        <div class="om-row">
+          <span class="om-line"></span>
+          <svg class="om-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="omGrad" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="#fce29a"/>
+                <stop offset="60%" stop-color="#f0cf6e"/>
+                <stop offset="100%" stop-color="#c89a3a"/>
+              </radialGradient>
+            </defs>
+            <path d="M 14 14 Q 32 4 50 14" fill="none" stroke="url(#omGrad)" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="32" cy="9" r="2.4" fill="url(#omGrad)"/>
+            <text x="32" y="50" font-family="'Tiro Devanagari Sanskrit', serif" font-size="44" font-weight="600" text-anchor="middle" fill="url(#omGrad)">ॐ</text>
+          </svg>
+          <span class="om-line"></span>
+        </div>
+        <div class="ganesh">श्री गणेशाय नमः</div>
+        <div class="mantra">मंगलम् भगवान् विष्णुः मंगलम् गरुडध्वजः ।</div>
+        <div class="mantra">मंगलम् पुण्डरीकाक्षः मंगलाय तनोहरिः ।।</div>
       </div>
 
       <!-- Block 2: Main Title -->
@@ -456,74 +1064,119 @@
 
       <!-- Block 3: Couple Names -->
       <div class="b3 block" style="animation-delay:3.2s" data-fade>
-        <div class="name" style="font-size: 70px">सुजन आचार्य</div>
+        <div class="name">सुजन आचार्य</div>
         <div class="ganesh-icon" id="ganeshIcon"></div>
-        <div class="name" style="font-size: 70px">निहारिका भट्टराई</div>
+        <div class="name">निहारिका भट्टराई</div>
       </div>
 
       <!-- Block 4: Invitation body -->
       <div class="b4 block" style="animation-delay:4.4s" data-fade>
         <div>
-          <span class="role" style="font-size: 34px">वर:</span>
-          <span class="person" style="font-size: 34px">चि. श्री सुजन आचार्य</span>
-          <span class="sub" style="font-size: 28px">(सुपुत्रः श्री ध्रुव प्रसाद आचार्य एवम् श्रीमती मल्लिका आचार्य, सूर्यविनायक, भक्तपुर)</span>
+          <span class="role">वर:</span>
+          <span class="person">चि. श्री सुजन आचार्य</span>
+          <span class="sub">(सुपुत्रः श्री ध्रुव प्रसाद आचार्य एवम् श्रीमती मल्लिका आचार्य, सूर्यविनायक, भक्तपुर)</span>
         </div>
         <div class="gap"></div>
         <div style="margin-top:4px;">को शुभविवाह</div>
         <div class="gap"></div>
         <div>
-          <span class="role" style="font-size: 34px">वधु:</span>
-          <span class="person" style="font-size: 34px">आ. निहारिका भट्टराई</span>
-          <span class="sub" style="font-size: 28px">(सुपुत्रीः श्री लक्ष्मी प्रसाद भट्टराई एवम् श्रीमती झल्का देवी भट्टराई, सूर्यविनायक, भक्तपुर)</span>
+          <span class="role">वधु:</span>
+          <span class="person">आ. निहारिका भट्टराई</span>
+          <span class="sub">(सुपुत्रीः श्री लक्ष्मी प्रसाद भट्टराई एवम् श्रीमती झल्का देवी भट्टराई, सूर्यविनायक, भक्तपुर)</span>
         </div>
-        <div class="body" style="font-size: 35px">
+        <div class="body">
           का साथ सु-सम्पन्न हुने भएकोले उक्त सुखद उपलक्ष्यमा उपस्थित भई वर-वधुलाई आशिर्वाद प्रदान गरिदिनुहुन यहाँको गरिमामय उपस्थितिका लागि हार्दिक आमन्त्रण गर्दछौं ।
         </div>
       </div>
+
+    </section>
+    <!-- ============== /SCENE 1 ============== -->
+
+
+    <!-- ============== SCENE 3 — The Event ============== -->
+    <section class="scene" data-scene="3">
 
       <!-- Block 5: Event Details -->
       <div class="b5 block" style="animation-delay:6.0s" data-fade>
         <h3>वैवाहिक कार्यक्रम</h3>
         <div class="event-row">
-          <div><span class="lbl" style="font-size: 42px">जन्ती प्रस्थान:</span> <span class="val" style="font-size: 34px">२०८३ असार २३ गते (July 7, 2026), बिहान १० बजे</span></div>
-          <span class="place" style="font-size: 31px">स्थान: आफ्नै निवासबाट (सूर्यविनायक, भक्तपुर)</span>
+          <div><span class="lbl">जन्ती प्रस्थान:</span> <span class="val">२०८३ असार २३ गते (July 7, 2026), बिहान १० बजे</span></div>
+          <span class="place">
+            स्थान:
+            <a class="venue-link" href="https://www.google.com/maps/search/?api=1&query=Suryavinayak+Bhaktapur" target="_blank" rel="noopener">आफ्नै निवासबाट (सूर्यविनायक, भक्तपुर)</a>
+          </span>
         </div>
         <div class="event-row">
-          <div><span class="lbl" style="font-size: 42px">प्रीति भोज:</span> <span class="val" style="font-size: 34px">२०८३ असार २४ गते (July 8, 2026), बेलुका ५ बजे</span></div>
-          <span class="place" style="font-size: 31px">स्थान: क्विन्स प्यालेस इभेन्ट्स (Queens Palace Events), सुकेधारा, काठमाडौं</span>
+          <div><span class="lbl">प्रीति भोज:</span> <span class="val">२०८३ असार २४ गते (July 8, 2026), बेलुका ५ बजे</span></div>
+          <span class="place">
+            स्थान:
+            <a class="venue-link" href="https://www.google.com/maps/search/?api=1&query=Queens+Palace+Events+Sukedhara+Kathmandu" target="_blank" rel="noopener">क्विन्स प्यालेस इभेन्ट्स (Queens Palace Events), सुकेधारा, काठमाडौं</a>
+          </span>
         </div>
-        <div class="contact"><span class="lbl" style="font-size: 32px">सम्पर्क:</span> <span class="val" style="font-size: 31px">९८५१२३३१४५, ९८५१०५५७९१</span></div>
+        <div class="contact">
+          <span class="lbl">सम्पर्क:</span>
+          <span class="val">
+            <a class="tel-link" href="tel:+9779851233145">९८५१२३३१४५</a>,
+            <a class="tel-link" href="tel:+9779851055791">९८५१०५५७९१</a>
+          </span>
+        </div>
+        <div class="countdown" id="countdown" aria-live="polite">
+          <span class="days" id="countdownDays">—</span>
+          <span class="label" id="countdownLabel">दिन बाँकी शुभ विवाहसम्म</span>
+        </div>
       </div>
 
-      <!-- Decorative divider -->
-      <div class="divider block" style="animation-delay:7.0s" data-fade>
+    </section>
+    <!-- ============== /SCENE 3 ============== -->
+
+
+    <!-- ============== SCENE 2 — The Family ============== -->
+    <section class="scene scene-family" data-scene="2">
+
+      <!-- Couple silhouette sits behind both blocks at 40% opacity -->
+      <img class="family-bg" src="couple.png" alt="" aria-hidden="true">
+
+      <div class="b6 block" style="animation-delay: 7.8s;" data-fade>
+        <div class="hdr">दर्शनाभिलाषी:</div>
+        <div class="row"><span class="k">हजुरबुबा/हजुरआमा:</span> स्व. राम प्रसाद आचार्य / श्रीमती सावित्री आचार्य</div>
+        <div class="row"><span class="k">मावली हजुरबुबा/हजुरआमा:</span> स्व. चूडाराज घिमिरे / श्रीमती घन कुमारी घिमिरे</div>
+        <div class="row"><span class="k">काका/काकी:</span> श्री यादव प्रसाद आचार्य / देवी आचार्य</div>
+        <div class="row"><span class="k">मामा/माइजु:</span> श्री नवराज घिमिरे / उर्मिला तिमल्सिना</div>
+        <div class="row"><span class="k">मामा/माइजु:</span> श्री शंकर घिमिरे / दुर्गा देवी दुलाल</div>
+        <div class="row"><span class="k">दाजु/भाउजु:</span> सुब्रत आचार्य / रचना काफ्ले</div>
+        <div class="row"><span class="k">भाइ/बुहारी:</span> सुरज आचार्य / शोभा ढकाल</div>
+        <div class="row"><span class="k">बैनी/ज्वाई:</span> सुमिना आचार्य / यादव घिमिरे</div>
+        <div class="row"><span class="k">छोरी:</span> अदिति आचार्य</div>
+        <div class="row"><span class="k">भान्जी:</span> न्यरा घिमिरे</div>
+        <div class="row" style="margin-top:6px; font-style:italic;">(एवं समस्त आचार्य परिवार)</div>
+      </div>
+
+      <!-- thin gold divider separating the family list above from प्रार्थी below -->
+      <div class="divider scene2-divider block" style="animation-delay: 8.4s" data-fade>
         <span class="line"></span>
         <span class="dia"></span>
         <span class="line"></span>
       </div>
 
-      <!-- Bottom row: well-wishers | silhouette | inviter -->
-      <div class="bottom-row">
-        <div class="b6 block" style="animation-delay: 7.8s; width: 45px" data-fade>
-          <div class="hdr">दर्शनाभिलाषी:</div>
-          <div class="row"><span class="k">हजुरबुबा/हजुरआमा:</span> स्व. राम प्रसाद आचार्य / श्रीमती सावित्री आचार्य</div>
-          <div class="row"><span class="k">काका/काकी:</span> श्री यादव प्रसाद आचार्य / देवी आचार्य</div>
-          <div class="row"><span class="k">दाजु/भाउजु:</span> सुब्रत आचार्य / रचना काफ्ले</div>
-          <div class="row"><span class="k">भाइ/बुहारी:</span> सुरज आचार्य / शोभा ढकाल</div>
-          <div class="row"><span class="k">बैनी/ज्वाई:</span> सुमिना आचार्य / यादव घिमिरे</div>
-          <div class="row"><span class="k">छोरी:</span> अदिति आचार्य</div>
-          <div class="row"><span class="k">भान्जी:</span> न्यरा घिमिरे</div>
-          <div class="row" style="margin-top:6px; font-style:italic;">(एवं समस्त आचार्य परिवार)</div>
-        </div>
-
-        <img class="couple block" src="couple.png" alt="Bride and Groom" style="animation-delay: 8.4s; opacity: 0; object-fit: fill; width: 220px" data-fade>
-
-        <div class="b7 block" style="animation-delay:9.0s" data-fade>
-          <div class="hdr" style="text-align: right; font-size: 38px">प्रार्थी:</div>
-          <div class="name" style="text-align: right; font-size: 34px">श्री ध्रुव प्रसाद आचार्य</div>
-          <div class="name" style="text-align: right; font-size: 34px">श्रीमती मल्लिका आचार्य</div>
-        </div>
+      <div class="b7 block" style="animation-delay:9.0s" data-fade>
+        <div class="hdr">प्रार्थी:</div>
+        <div class="name">श्री ध्रुव प्रसाद आचार्य</div>
+        <div class="name">श्रीमती मल्लिका आचार्य</div>
       </div>
+
+    </section>
+    <!-- ============== /SCENE 2 ============== -->
+
+    </div>
+    <!-- /content -->
+
+    <!-- Scene navigation UI -->
+    <button class="nav-arrow nav-back" id="navBack" type="button" aria-label="Previous scene">‹</button>
+    <button class="nav-arrow nav-fwd"  id="navFwd"  type="button" aria-label="Next scene">›</button>
+    <div class="nav-dots" id="navDots" role="tablist" aria-label="Scenes">
+      <button class="dot is-active" data-scene="1" aria-label="Scene 1"></button>
+      <button class="dot"           data-scene="2" aria-label="Scene 2"></button>
+      <button class="dot"           data-scene="3" aria-label="Scene 3"></button>
     </div>
 
     <div class="vignette"></div>
@@ -535,49 +1188,340 @@
 <script src="mandala.js"></script>
 <script>
   /* ============================================================
-     Fit 1080x1920 canvas to viewport
+     0. FONT LOAD PROBE — surfaces when @font-face fails (e.g. file:// blocked)
+     ============================================================ */
+  (function probeFonts() {
+    if (!document.fonts || !document.fonts.load) return;
+    const wanted = ['AMS Ganesha', 'AMS Chandrakant', 'Bishwa Calligraphy'];
+    Promise.all(wanted.map(f => document.fonts.load(`32px "${f}"`, 'शुभ').then(
+      arr => ({ f, ok: arr.length > 0 }),
+      _   => ({ f, ok: false })
+    ))).then(results => {
+      const failed = results.filter(r => !r.ok).map(r => r.f);
+      if (failed.length) {
+        console.warn('[wedding] custom fonts failed to load:', failed,
+          '\n→ If you opened the file directly via file://, browsers block local font requests.\n' +
+          '→ Fix: run a local web server. E.g. in PowerShell:\n' +
+          '     cd "' + location.pathname.replace(/\/[^/]*$/, '') + '"\n' +
+          '     python -m http.server 8000\n' +
+          '   then open http://localhost:8000/index.html');
+      } else {
+        console.log('[wedding] all custom fonts loaded ✓');
+      }
+    });
+  })();
+
+  /* ============================================================
+     1. PERSONALIZATION — read recipient name from ?to= query param
+     ============================================================ */
+  function readGuestName() {
+    const p = new URLSearchParams(location.search);
+    const raw = (p.get('to') || '').trim();
+    if (!raw) return 'Esteemed Guest';
+    // sanitise: strip angle brackets, cap length
+    return raw.replace(/[<>]/g, '').slice(0, 60);
+  }
+  document.getElementById('envName').textContent = 'Dear ' + readGuestName();
+
+  /* ============================================================
+     2. GLITTER — sprinkle gold particles on the intro overlay
+     ============================================================ */
+  (function buildGlitter() {
+    const layer = document.getElementById('glitter');
+    if (!layer) return;
+    const N = 50;
+    let html = '';
+    for (let i = 0; i < N; i++) {
+      const left  = Math.random() * 100;
+      const top   = Math.random() * 100;
+      const dur   = (2 + Math.random() * 3).toFixed(2);
+      const delay = (Math.random() * 4).toFixed(2);
+      const size  = (3 + Math.random() * 4).toFixed(1);
+      html += `<span class="spark" style="left:${left}%;top:${top}%;width:${size}px;height:${size}px;--dur:${dur}s;--delay:${delay}s;"></span>`;
+    }
+    layer.innerHTML = html;
+  })();
+
+  /* ============================================================
+     3. FIT — width-fit on phones; centered letterbox on wide screens.
+     Sizes .stage to the scaled canvas height so the page scrolls naturally.
      ============================================================ */
   function fit() {
-    const c = document.getElementById('canvas');
-    const sx = window.innerWidth  / 1080;
-    const sy = window.innerHeight / 1920;
-    const s  = Math.min(sx, sy);
-    const w  = 1080 * s;
-    const h  = 1920 * s;
-    c.style.transform = `translate(${-w/2}px, ${-h/2}px) scale(${s})`;
+    const c     = document.getElementById('canvas');
+    const stage = document.querySelector('.stage');
+    const vv    = window.visualViewport;
+    const w     = vv ? vv.width  : window.innerWidth;
+    const h     = vv ? vv.height : window.innerHeight;
+    const wide  = w >= h;  // landscape / tablet+desktop
+
+    let scale, offsetX, offsetY;
+    if (wide) {
+      // letterbox: fit the whole 1080x1920 inside the viewport, centered
+      scale = Math.min(w / 1080, h / 1920);
+      offsetX = (w - 1080 * scale) / 2;
+      offsetY = (h - 1920 * scale) / 2;
+      stage.style.height = h + 'px';
+    } else {
+      // mobile: width-fit, let it scroll below the fold
+      scale   = w / 1080;
+      offsetX = 0;
+      offsetY = 0;
+      stage.style.height = (1920 * scale) + 'px';
+    }
+    c.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
   }
   window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', fit);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fit);
+  }
   fit();
+  // re-fit after layout settles (iOS Safari URL bar collapse)
+  setTimeout(fit, 100);
+  setTimeout(fit, 500);
 
   /* ============================================================
-     Build SVGs
+     4. BUILD SVGs
      ============================================================ */
-  document.getElementById('mandala').innerHTML = buildMandala();
-  document.getElementById('ghost').innerHTML   = buildGhostMandala();
-  document.getElementById('topborder').innerHTML = buildTopBorder(4800, 120);
+  document.getElementById('mandala').innerHTML    = buildMandala();
+  document.getElementById('ghost').innerHTML      = buildGhostMandala();
+  document.getElementById('topborder').innerHTML  = buildTopBorder(4800, 120);
   document.getElementById('ganeshIcon').innerHTML = buildGanesh();
-  document.getElementById('cornerTL').innerHTML = buildCorner();
-  document.getElementById('cornerTR').innerHTML = buildCorner();
+  document.getElementById('cornerTL').innerHTML   = buildCorner();
+  document.getElementById('cornerTR').innerHTML   = buildCorner();
 
   /* ============================================================
-     Sequencing — start fades
+     5. COUNTDOWN — days until July 7, 2026 (Nepal time)
      ============================================================ */
-  function start() {
-    document.querySelectorAll('[data-fade]').forEach(el => {
+  function toDevanagariDigits(n) {
+    const map = ['०','१','२','३','४','५','६','७','८','९'];
+    return String(n).split('').map(c => /\d/.test(c) ? map[+c] : c).join('');
+  }
+  function updateCountdown() {
+    const target = new Date('2026-07-07T11:00:00+05:45');
+    const diffMs = target - new Date();
+    const daysEl  = document.getElementById('countdownDays');
+    const labelEl = document.getElementById('countdownLabel');
+    const wrapEl  = document.getElementById('countdown');
+    if (!daysEl) return;
+    if (diffMs <= 0) {
+      wrapEl.classList.add('now');
+      daysEl.textContent = '✦';
+      labelEl.textContent = 'आज शुभ विवाहको दिन — Today is the day';
+      return;
+    }
+    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    daysEl.textContent = toDevanagariDigits(days);
+    labelEl.textContent = (days === 1)
+      ? 'दिन बाँकी — 1 day to go'
+      : `दिन बाँकी — ${days} days to शुभ विवाह`;
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 60 * 60 * 1000);
+
+  /* ============================================================
+     6. PER-SCENE SEQUENCING — fades + shimmer, scoped to one scene
+     ============================================================ */
+  // Per-scene shimmer targets (selectors are scoped to the active scene)
+  const SHIMMER_BY_SCENE = {
+    1: ['.b2 .title', '.b3'],
+    2: ['.b7 .hdr', '.b6 .hdr'],
+    3: ['.b5 h3'],
+  };
+
+  function startSceneAnimations(n) {
+    const scene = document.querySelector(`.scene[data-scene="${n}"]`);
+    if (!scene) return;
+
+    // Restart fade-in for every [data-fade] inside this scene, with a quick
+    // local cascade (200ms between blocks) instead of the old 1100ms cascade
+    // that was tuned for an all-on-one-page layout.
+    const fadeEls = scene.querySelectorAll('[data-fade]');
+    fadeEls.forEach((el, i) => {
+      el.style.animationDelay = (0.15 + i * 0.25) + 's';
       el.classList.remove('fade');
-      // force reflow
-      void el.offsetWidth;
-      el.classList.add('fade');
+    });
+    // force reflow then re-apply
+    void scene.offsetWidth;
+    fadeEls.forEach(el => el.classList.add('fade'));
+
+    // Reset any prior shimmer state inside this scene, then re-trigger
+    scene.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer-go'));
+    const targets = SHIMMER_BY_SCENE[n] || [];
+    targets.forEach((sel, i) => {
+      scene.querySelectorAll(sel).forEach(el => {
+        el.classList.add('shimmer');
+        // wait until the block has faded in before sweeping shimmer over it
+        setTimeout(() => {
+          void el.offsetWidth;
+          el.classList.add('shimmer-go');
+        }, 900 + i * 600);
+      });
     });
   }
-  start();
 
-  document.getElementById('replay').addEventListener('click', () => {
-    // restart by re-applying class
-    document.querySelectorAll('[data-fade]').forEach(el => {
-      el.classList.remove('fade');
+  /* ============================================================
+     7. SCENE NAVIGATION — tap to advance, back arrow, dots, keyboard
+     ============================================================ */
+  const TOTAL_SCENES = 3;
+  let currentScene = 1;
+
+  function showScene(n) {
+    n = Math.max(1, Math.min(TOTAL_SCENES, n));
+    if (n === currentScene) return;
+    currentScene = n;
+
+    document.querySelectorAll('.scene').forEach(s => {
+      s.classList.toggle('is-active', +s.dataset.scene === n);
     });
-    requestAnimationFrame(() => requestAnimationFrame(start));
+    document.querySelectorAll('.nav-dots .dot').forEach(d => {
+      d.classList.toggle('is-active', +d.dataset.scene === n);
+    });
+
+    // swap the canvas background variation (mandala glides to new position)
+    const canvas = document.getElementById('canvas');
+    canvas.classList.remove('scene-1', 'scene-2', 'scene-3');
+    canvas.classList.add('scene-' + n);
+
+    // hide back arrow on scene 1, forward arrow on last scene
+    document.getElementById('navBack').hidden = (n === 1);
+    document.getElementById('navFwd').hidden  = (n === TOTAL_SCENES);
+
+    // animate the new scene
+    startSceneAnimations(n);
+  }
+
+  document.getElementById('navFwd').addEventListener('click',  () => showScene(currentScene + 1));
+  document.getElementById('navBack').addEventListener('click', () => showScene(currentScene - 1));
+
+  // Dot indicator: clicking any dot jumps directly to that scene
+  document.querySelectorAll('.nav-dots .dot').forEach(d => {
+    d.addEventListener('click', () => showScene(+d.dataset.scene));
+  });
+
+  // Tap-to-advance anywhere on the active scene (but not on links/buttons)
+  document.querySelector('.content').addEventListener('click', (e) => {
+    if (e.target.closest('a, button, .nav-arrow, .dot')) return;
+    if (currentScene < TOTAL_SCENES) showScene(currentScene + 1);
+  });
+
+  // Keyboard navigation for desktop
+  document.addEventListener('keydown', (e) => {
+    // ignore while the envelope intro is still showing
+    if (document.getElementById('intro') && !document.getElementById('intro').classList.contains('gone')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ')      { e.preventDefault(); showScene(currentScene + 1); }
+    else if (e.key === 'ArrowLeft')                   { e.preventDefault(); showScene(currentScene - 1); }
+    else if (e.key === 'Home')                        { e.preventDefault(); showScene(1); }
+    else if (e.key === 'End')                         { e.preventDefault(); showScene(TOTAL_SCENES); }
+  });
+
+  /* ============================================================
+     8. MUSIC — YouTube background audio with mute toggle.
+     Starts muted so autoplay isn't blocked; unmutes on user tap.
+     Swap MUSIC_VIDEO_ID below to change the track.
+     ============================================================ */
+  const MUSIC_VIDEO_ID = 'bd0Vh82rdhc';   // shehnai instrumental — replace any time
+  let ytPlayer = null;
+  let musicReady = false;
+
+  // Load the YouTube IFrame API
+  (function loadYT() {
+    const s = document.createElement('script');
+    s.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+  })();
+
+  // YouTube API calls this global when the iframe API is ready
+  window.onYouTubeIframeAPIReady = function () {
+    ytPlayer = new YT.Player('ytPlayer', {
+      height: '1',
+      width: '1',
+      videoId: MUSIC_VIDEO_ID,
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        iv_load_policy: 3,
+        loop: 1,
+        modestbranding: 1,
+        playlist: MUSIC_VIDEO_ID,   // required for loop to work on a single video
+        playsinline: 1,
+        rel: 0,
+      },
+      events: {
+        onReady: (e) => {
+          musicReady = true;
+          e.target.mute();           // start muted so autoplay succeeds
+          // Don't call playVideo() yet — wait for the envelope tap (user gesture)
+        },
+        onError: (err) => {
+          console.warn('[wedding] music error:', err && err.data);
+        },
+      },
+    });
+  };
+
+  function startMusicMuted() {
+    if (musicReady && ytPlayer && ytPlayer.playVideo) {
+      try { ytPlayer.playVideo(); } catch (_) {}
+    }
+  }
+
+  // Mute / unmute toggle button
+  const musicBtn  = document.getElementById('musicToggle');
+  const musicIcon = document.getElementById('musicIcon');
+  function setMusicIcon(unmuted) {
+    musicIcon.textContent = unmuted ? '♫' : '♪';
+    musicBtn.classList.toggle('is-playing', unmuted);
+    musicBtn.setAttribute('aria-label', unmuted ? 'Mute music' : 'Play music');
+  }
+  setMusicIcon(false);
+  musicBtn.addEventListener('click', () => {
+    if (!ytPlayer) return;
+    if (typeof ytPlayer.isMuted !== 'function') return;
+    if (ytPlayer.isMuted()) {
+      ytPlayer.unMute();
+      ytPlayer.playVideo();
+      setMusicIcon(true);
+    } else {
+      ytPlayer.mute();
+      setMusicIcon(false);
+    }
+  });
+
+  /* ============================================================
+     9. ENVELOPE — open on CTA tap, then play scene 1
+     ============================================================ */
+  let cardStarted = false;
+  function openEnvelope() {
+    if (cardStarted) return;
+    cardStarted = true;
+    const intro = document.getElementById('intro');
+    intro.classList.add('opening');
+    // start (muted) music — user gesture allows autoplay; tap mute button to unmute
+    startMusicMuted();
+    // begin scene 1 as the envelope opens
+    setTimeout(() => {
+      // ensure scene 1 is the active one and reset its arrows
+      document.getElementById('canvas').classList.add('scene-1');
+      document.getElementById('navBack').hidden = true;
+      document.getElementById('navFwd').hidden  = false;
+      startSceneAnimations(1);
+    }, 500);
+    setTimeout(() => intro.classList.add('gone'), 1600);
+    setTimeout(() => intro && intro.parentNode && intro.parentNode.removeChild(intro), 2800);
+  }
+  document.getElementById('introCta').addEventListener('click', openEnvelope);
+  document.getElementById('envelope').addEventListener('click', openEnvelope);
+
+  /* ============================================================
+     10. REPLAY — jump back to scene 1
+     ============================================================ */
+  document.getElementById('replay').addEventListener('click', () => {
+    // bypass showScene's no-op check by clearing current first
+    currentScene = 0;
+    showScene(1);
   });
 </script>
 </body>
