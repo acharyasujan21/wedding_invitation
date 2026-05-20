@@ -920,15 +920,8 @@
   .canvas.scene-3 .ghost { opacity: 0.04; }
 
   /* ============================================================
-     YOUTUBE BACKGROUND MUSIC — hidden iframe + visible mute toggle
+     BACKGROUND MUSIC — local <audio> + visible mute toggle
      ============================================================ */
-  #ytWrap {
-    position: fixed;
-    width: 1px; height: 1px;
-    left: -9999px; top: -9999px;
-    opacity: 0;
-    pointer-events: none;
-  }
   .music-toggle {
     position: fixed;
     left: 16px; bottom: 16px;
@@ -983,10 +976,8 @@
 </head>
 <body style="background-color: #15040a">
 
-<!-- Hidden YouTube background music. Swap the videoId in the script (8. MUSIC) to change track. -->
-<div id="ytWrap" aria-hidden="true">
-  <div id="ytPlayer"></div>
-</div>
+<!-- Local background music. To change track: replace music.mp3.mpeg in the project folder. -->
+<audio id="bgMusic" src="music.mp3.mpeg" loop preload="auto" type="audio/mpeg"></audio>
 <button class="music-toggle" id="musicToggle" type="button" aria-label="Toggle background music" title="Toggle music">
   <span class="music-icon" id="musicIcon">♪</span>
 </button>
@@ -1416,78 +1407,47 @@
   });
 
   /* ============================================================
-     8. MUSIC — YouTube background audio with mute toggle.
-     Starts muted so autoplay isn't blocked; unmutes on user tap.
-     Swap MUSIC_VIDEO_ID below to change the track.
+     8. MUSIC — local <audio> file with mute toggle.
+     Starts muted on the envelope tap (the user gesture autoplay needs),
+     then unmutes when the user taps the ♪ button.
+     To change track: replace music.mp3.mpeg in the project folder.
      ============================================================ */
-  const MUSIC_VIDEO_ID = 'bd0Vh82rdhc';   // shehnai instrumental — replace any time
-  let ytPlayer = null;
-  let musicReady = false;
-
-  // Load the YouTube IFrame API
-  (function loadYT() {
-    const s = document.createElement('script');
-    s.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(s);
-  })();
-
-  // YouTube API calls this global when the iframe API is ready
-  window.onYouTubeIframeAPIReady = function () {
-    ytPlayer = new YT.Player('ytPlayer', {
-      height: '1',
-      width: '1',
-      videoId: MUSIC_VIDEO_ID,
-      playerVars: {
-        autoplay: 1,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        iv_load_policy: 3,
-        loop: 1,
-        modestbranding: 1,
-        playlist: MUSIC_VIDEO_ID,   // required for loop to work on a single video
-        playsinline: 1,
-        rel: 0,
-      },
-      events: {
-        onReady: (e) => {
-          musicReady = true;
-          e.target.mute();           // start muted so autoplay succeeds
-          // Don't call playVideo() yet — wait for the envelope tap (user gesture)
-        },
-        onError: (err) => {
-          console.warn('[wedding] music error:', err && err.data);
-        },
-      },
-    });
-  };
-
-  function startMusicMuted() {
-    if (musicReady && ytPlayer && ytPlayer.playVideo) {
-      try { ytPlayer.playVideo(); } catch (_) {}
-    }
-  }
-
-  // Mute / unmute toggle button
+  const bgMusic   = document.getElementById('bgMusic');
   const musicBtn  = document.getElementById('musicToggle');
   const musicIcon = document.getElementById('musicIcon');
+
+  bgMusic.volume = 0.55;            // gentle background level
+  bgMusic.muted  = true;            // muted so autoplay isn't blocked
+
   function setMusicIcon(unmuted) {
     musicIcon.textContent = unmuted ? '♫' : '♪';
     musicBtn.classList.toggle('is-playing', unmuted);
     musicBtn.setAttribute('aria-label', unmuted ? 'Mute music' : 'Play music');
   }
   setMusicIcon(false);
+
+  // Kick off silent playback when the envelope opens (user gesture allows it).
+  function startMusicMuted() {
+    bgMusic.muted = true;
+    const p = bgMusic.play();
+    if (p && p.catch) p.catch(() => { /* autoplay blocked; tap the button */ });
+  }
+
+  // Toggle button: unmute (and start if not yet playing) ↔ mute
   musicBtn.addEventListener('click', () => {
-    if (!ytPlayer) return;
-    if (typeof ytPlayer.isMuted !== 'function') return;
-    if (ytPlayer.isMuted()) {
-      ytPlayer.unMute();
-      ytPlayer.playVideo();
+    if (bgMusic.muted || bgMusic.paused) {
+      bgMusic.muted = false;
+      const p = bgMusic.play();
+      if (p && p.catch) p.catch(err => console.warn('[wedding] play failed:', err));
       setMusicIcon(true);
     } else {
-      ytPlayer.mute();
+      bgMusic.muted = true;
       setMusicIcon(false);
     }
+  });
+
+  bgMusic.addEventListener('error', () => {
+    console.warn('[wedding] could not load music.mp3.mpeg — check file is in project folder');
   });
 
   /* ============================================================
