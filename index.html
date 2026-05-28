@@ -167,7 +167,7 @@
     width: 1300px; height: 1300px;
     left: 50%; top: 38%;
     transform: translate(-50%, -50%);
-    opacity: 0.10;
+    opacity: 0.05;            /* very faint — barely a hint behind text */
     z-index: 1;
     pointer-events: none;
   }
@@ -184,8 +184,8 @@
     animation: mandalaIn 2.4s cubic-bezier(.2,.7,.2,1) 0.2s forwards;
   }
   @keyframes mandalaIn {
-    from { opacity: 0; transform: scale(0.92) rotate(-6deg); }
-    to   { opacity: 1; transform: scale(1)    rotate(0deg); }
+    from { opacity: 0;    transform: scale(0.92) rotate(-6deg); }
+    to   { opacity: 0.3;  transform: scale(1)    rotate(0deg); }
   }
   .mandala .lyr { transform-origin: 50% 50%; }
   .mandala .spin-cw  { animation: spinCW  var(--dur, 120s) linear infinite; }
@@ -918,16 +918,16 @@
   /* Scene 2: mandala centered and slightly smaller behind the family columns */
   .canvas.scene-2 .mandala {
     transform: translate(180px, 230px) scale(0.78);
-    opacity: 0.55;
+    opacity: 0.18;             /* very faint — family text needs to dominate */
   }
-  .canvas.scene-2 .ghost { opacity: 0.06; }
+  .canvas.scene-2 .ghost { opacity: 0.03; }
 
   /* Scene 3: mandala small at the top center, like an emblem */
   .canvas.scene-3 .mandala {
     transform: translate(-100px, -1180px) scale(0.42);
-    opacity: 0.6;
+    opacity: 0.25;
   }
-  .canvas.scene-3 .ghost { opacity: 0.04; }
+  .canvas.scene-3 .ghost { opacity: 0.03; }
 
   /* ============================================================
      BACKGROUND MUSIC — local <audio> + visible mute toggle
@@ -1193,17 +1193,15 @@
       <div class="b6 block" style="animation-delay: 7.8s;" data-fade>
         <div class="hdr">दर्शनाभिलाषी:</div>
         <div class="row">श्री ध्रुव प्रसाद आचार्य / श्रीमती मल्लिका आचार्य</div>
-        <div class="row">स्व. राम प्रसाद आचार्य / श्रीमती सावित्री आचार्य</div>
-        <div class="row">स्व. चूडाराज घिमिरे / श्रीमती घन कुमारी घिमिरे</div>
         <div class="row">श्री यादव प्रसाद आचार्य / श्रीमती देवी आचार्य</div>
         <div class="row">श्री दुर्गा प्रसाद काफ्ले / श्रीमती कल्याणी काफ्ले</div>
         <div class="row">श्री शिव प्रसाद कोइराला / श्रीमती मीना कोइराला</div>
         <div class="row">श्री नवराज घिमिरे / श्रीमती उर्मिला घिमिरे</div>
         <div class="row">श्री शंकर घिमिरे / श्रीमती दुर्गा घिमिरे</div>
-        <div class="row">श्री सुब्रत आचार्य / श्रीमती रचना आचार्य</div>
         <div class="row">श्री रमेश काफ्ले / श्रीमती बिन्दा काफ्ले</div>
-        <div class="row">श्री सुरज आचार्य / श्रीमती शोभा आचार्य</div>
-        <div class="row">श्री यादव घिमिरे / श्रीमती सुमिना घिमिरे</div>
+        <div class="row">श्री सुब्रत आचार्य / श्रीमती रचना काफ्ले</div>
+        <div class="row">श्री यादव घिमिरे / श्रीमती सुमिना आचार्य</div>
+        <div class="row">श्री सुरज आचार्य / श्रीमती शोभा ढकाल</div>
         <div class="row">सुश्री अदिति आचार्य</div>
         <div class="row">सुश्री न्यरा घिमिरे</div>
         <div class="row" style="margin-top:6px; font-style:italic;">(एवं समस्त आचार्य परिवार)</div>
@@ -1524,10 +1522,8 @@
   const musicIcon = document.getElementById('musicIcon');
 
   bgMusic.volume = 0.25;            // soft background level — not the main event
-  bgMusic.muted  = true;            // muted so autoplay isn't blocked
 
-  // Loop only the first 2 minutes (saves listeners from a long track and
-  // keeps the ambient feel — when it reaches 120s, jump back to the start).
+  // Loop only the first 2 minutes (when it reaches 120s, jump back to start).
   const MUSIC_LOOP_END_S = 120;
   bgMusic.addEventListener('timeupdate', () => {
     if (bgMusic.currentTime >= MUSIC_LOOP_END_S) {
@@ -1535,29 +1531,38 @@
     }
   });
 
-  function setMusicIcon(unmuted) {
-    musicIcon.textContent = unmuted ? '♫' : '♪';
-    musicBtn.classList.toggle('is-playing', unmuted);
-    musicBtn.setAttribute('aria-label', unmuted ? 'Mute music' : 'Play music');
+  function setMusicIcon(playing) {
+    musicIcon.textContent = playing ? '♫' : '♪';
+    musicBtn.classList.toggle('is-playing', playing);
+    musicBtn.setAttribute('aria-label', playing ? 'Stop music' : 'Play music');
   }
   setMusicIcon(false);
 
-  // Kick off silent playback when the envelope opens (user gesture allows it).
-  function startMusicMuted() {
-    bgMusic.muted = true;
+  // Start music with sound on envelope tap (user gesture allows autoplay-with-sound).
+  function startMusic() {
+    bgMusic.muted = false;
     const p = bgMusic.play();
-    if (p && p.catch) p.catch(() => { /* autoplay blocked; tap the button */ });
+    if (p && p.catch) {
+      p.catch(() => {
+        // Browser still blocked it (rare). Fall back to muted autoplay so the
+        // button can unmute later.
+        bgMusic.muted = true;
+        bgMusic.play().catch(() => {});
+        setMusicIcon(false);
+      });
+    }
+    setMusicIcon(true);
   }
 
-  // Toggle button: unmute (and start if not yet playing) ↔ mute
+  // Button: stop (pause) ↔ resume. Single tap kills the audio.
   musicBtn.addEventListener('click', () => {
-    if (bgMusic.muted || bgMusic.paused) {
+    if (bgMusic.paused || bgMusic.muted) {
       bgMusic.muted = false;
       const p = bgMusic.play();
       if (p && p.catch) p.catch(err => console.warn('[wedding] play failed:', err));
       setMusicIcon(true);
     } else {
-      bgMusic.muted = true;
+      bgMusic.pause();
       setMusicIcon(false);
     }
   });
@@ -1575,8 +1580,9 @@
     cardStarted = true;
     const intro = document.getElementById('intro');
     intro.classList.add('opening');
-    // start (muted) music — user gesture allows autoplay; tap mute button to unmute
-    startMusicMuted();
+    // start music with sound — envelope tap is a real user gesture, so most
+    // browsers will allow audio. Tap the ♪ button to stop it.
+    startMusic();
     // begin scene 1 as the envelope opens
     setTimeout(() => {
       // ensure scene 1 is the active one and reset its arrows
