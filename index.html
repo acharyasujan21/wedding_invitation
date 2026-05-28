@@ -60,6 +60,13 @@
 
     --cream:  #fff4dc;
     --paper:  #f6e6c4;
+
+    /* ---- Unified type scale — shared by all three scenes ----
+       Change a value here and it updates consistently everywhere. */
+    --fs-heading:  58px;   /* section titles: वैवाहिक कार्यक्रम, दर्शनाभिलाषी, प्रार्थी */
+    --fs-emphasis: 44px;   /* gold-emphasised labels & names inside body text */
+    --fs-body:     40px;   /* main body / list text on every scene */
+    --fs-small:    36px;   /* parenthetical italic sub-text */
   }
 
   * { box-sizing: border-box; }
@@ -252,8 +259,8 @@
     line-height: 1.55;
     letter-spacing: 0.5px;
   }
-  .b1 .ganesh { font-size: 50px; opacity: 0.95; margin-bottom: 10px; }
-  .b1 .mantra { font-size: 40px; opacity: 0.92; }
+  .b1 .ganesh { font-size: var(--fs-emphasis); opacity: 0.95; margin-bottom: 10px; }
+  .b1 .mantra { font-size: var(--fs-body); opacity: 0.92; }
   .b1 .om-row {
     display: flex;
     align-items: center;
@@ -302,7 +309,7 @@
     text-shadow: 0 0 14px rgba(240,207,110,0.35);
   }
   .countdown .label {
-    font-size: 32px;
+    font-size: var(--fs-small);
     color: rgba(255,244,220,0.92);
     letter-spacing: 0.5px;
   }
@@ -402,21 +409,24 @@
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
     line-height: 1.55;
-    font-size: 38px;
+    font-size: var(--fs-body);
     padding: 0 30px;
-    max-width: 960px;
+    max-width: 980px;
   }
   .b4 .role { color: var(--gold-bright); font-weight: 600; }
-  .b4 .person { color: var(--gold-bright); }
+  .b4 .person {
+    color: var(--gold-bright);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* parenthetical parent names flow inline within the narrative sentence */
   .b4 .sub {
-    display: block;
-    font-size: 30px;
-    color: rgba(255,244,220,0.85);
+    font-size: var(--fs-small);
+    color: rgba(255,244,220,0.88);
     font-style: italic;
-    margin-top: 6px;
   }
   .b4 .gap { height: 12px; }
-  .b4 .body { margin-top: 18px; font-size: 36px; line-height: 1.55; }
+  .b4 .body { margin-top: 18px; font-size: var(--fs-body); line-height: 1.6; }
 
   /* Block 5: event details (centered) */
   .b5 {
@@ -430,14 +440,14 @@
   .b5 h3 {
     font-family: 'AMS Chandrakant', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
     color: var(--gold-bright);
-    font-size: 64px;
+    font-size: var(--fs-heading);
     margin: 0 0 28px;
     letter-spacing: 1px;
     text-shadow: 0 0 14px rgba(240,207,110,0.18);
   }
   .b5 .event-row {
     margin-bottom: 44px;          /* clear break between प्रीति भोज and जन्ती प्रस्थान */
-    line-height: 1.5;
+    line-height: 1.55;
   }
   /* first line of each event-row: bold gold label + date */
   .b5 .event-row > div:first-child {
@@ -446,9 +456,9 @@
   .b5 .lbl {
     color: var(--gold-bright);
     font-weight: 600;
-    font-size: 46px;
+    font-size: var(--fs-emphasis);
   }
-  .b5 .val { font-size: 40px; color: var(--cream); }
+  .b5 .val { font-size: var(--fs-body); color: var(--cream); }
   .b5 .val,
   .countdown .label,
   .b5 .place { font-feature-settings: "liga"; }
@@ -458,17 +468,17 @@
     font-family: 'Tiro Devanagari Sanskrit', 'Cormorant Garamond', serif;
   }
   .b5 .place {
-    font-size: 36px;
+    font-size: var(--fs-small);
     color: rgba(255,244,220,0.90);
     display: block;
     margin-top: 10px;
-    line-height: 1.45;
+    line-height: 1.5;
   }
   .b5 .contact {
     margin-top: 32px;             /* more breathing room before contact line */
-    font-size: 38px;
+    font-size: var(--fs-body);
   }
-  .b5 .contact .lbl { font-size: 40px; }
+  .b5 .contact .lbl { font-size: var(--fs-emphasis); }
 
   /* Decorative divider between events and bottom row */
   .divider {
@@ -505,22 +515,22 @@
     flex: 1 1 0;
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: var(--cream);
-    line-height: 1.4;
+    line-height: 1.3;
     text-align: left;
-    max-width: 540px;
+    max-width: 900px;
   }
   .b6 .hdr {
     color: var(--gold-bright);
     font-family: 'AMS Chandrakant', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
-    font-size: 48px;
+    font-size: var(--fs-heading);
     letter-spacing: 1px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   .b6 .row {
-    font-size: 28px;
+    font-size: var(--fs-body);
     color: rgba(255,244,220,0.94);
-    margin-bottom: 6px;
-    line-height: 1.45;
+    margin-bottom: 4px;
+    line-height: 1.3;
   }
   .b6 .row .k { color: var(--gold-bright); font-weight: 600; }
 
@@ -528,21 +538,21 @@
   .b7 {
     flex: 0 0 auto;
     font-family: 'Tiro Devanagari Sanskrit', serif;
-    text-align: right;
+    text-align: center;
     min-width: 280px;
-    max-width: 380px;
+    max-width: 700px;
   }
   .b7 .hdr {
     color: var(--gold-bright);
     font-family: 'AMS Chandrakant', 'Yatra One', 'Tiro Devanagari Sanskrit', serif;
-    font-size: 48px;
+    font-size: var(--fs-heading);
     letter-spacing: 1px;
     margin-bottom: 14px;
   }
   .b7 .name {
     color: var(--gold-bright);
-    font-size: 36px;
-    line-height: 1.45;
+    font-size: var(--fs-body);
+    line-height: 1.4;
   }
 
   /* corner filigree accents */
@@ -1028,8 +1038,8 @@
 </head>
 <body style="background-color: #15040a">
 
-<!-- Local background music. To change track: replace music.mp3.mpeg in the project folder. -->
-<audio id="bgMusic" src="music.mp3.mpeg" loop preload="auto" type="audio/mpeg"></audio>
+<!-- Local background music. To change track: replace new_music.m4a in the project folder. -->
+<audio id="bgMusic" src="new_music.m4a" loop preload="auto" type="audio/mp4"></audio>
 <button class="music-toggle" id="musicToggle" type="button" aria-label="Toggle background music" title="Toggle music">
   <span class="music-icon" id="musicIcon">♪</span>
 </button>
@@ -1118,23 +1128,18 @@
         <div class="name">निहारिका भट्टराई</div>
       </div>
 
-      <!-- Block 4: Invitation body -->
+      <!-- Block 4: Invitation body — grandparent-voice narrative -->
       <div class="b4 block" style="animation-delay:4.4s" data-fade>
-        <div>
-          <span class="role">वर:</span>
-          <span class="person">चि. श्री सुजन आचार्य</span>
-          <span class="sub">(सुपुत्रः श्री ध्रुव प्रसाद आचार्य एवम् श्रीमती मल्लिका आचार्य, सूर्यविनायक, भक्तपुर)</span>
-        </div>
-        <div class="gap"></div>
-        <div style="margin-top:4px;">को शुभविवाह</div>
-        <div class="gap"></div>
-        <div>
-          <span class="role">वधु:</span>
-          <span class="person">आ. निहारिका भट्टराई</span>
-          <span class="sub">(सुपुत्रीः श्री लक्ष्मी प्रसाद भट्टराई एवम् श्रीमती झल्का देवी भट्टराई, सूर्यविनायक, भक्तपुर)</span>
-        </div>
         <div class="body">
-          का साथ सु-सम्पन्न हुने भएकोले उक्त सुखद उपलक्ष्यमा उपस्थित भई वर-वधुलाई आशिर्वाद प्रदान गरिदिनुहुन यहाँको गरिमामय उपस्थितिका लागि हार्दिक आमन्त्रण गर्दछौं ।
+          हाम्रा आयुष्मान नाती
+          <span class="person">चि. श्री सुजन आचार्य</span>
+          <span class="sub">(श्री ध्रुव प्रसाद आचार्य तथा श्रीमती मल्लिका आचार्यका सुपुत्र, सूर्यविनायक, भक्तपुर)</span>
+          को
+          सूर्यविनायक, भक्तपुर निवासी
+          <span class="sub">(श्री लक्ष्मी प्रसाद भट्टराई तथा श्रीमती झल्का देवी भट्टराई)</span>
+          का आयुष्मती सुपुत्री
+          <span class="person">सुश्री निहारिका भट्टराई</span>
+          का साथ सुसम्पन्न हुने <span class="role">शुभ विवाह</span>को सुखद उपलक्ष्यमा वर-वधुलाई शुभआशिर्वाद प्रदान गरिदिनुहुन यहाँको गरिमामय उपस्थितिका लागि हार्दिक आमन्त्रण गर्दछौं ।
         </div>
       </div>
 
@@ -1187,16 +1192,20 @@
 
       <div class="b6 block" style="animation-delay: 7.8s;" data-fade>
         <div class="hdr">दर्शनाभिलाषी:</div>
-        <div class="row"><span class="k">हजुरबुबा/हजुरआमा:</span> स्व. राम प्रसाद आचार्य / श्रीमती सावित्री आचार्य</div>
-        <div class="row"><span class="k">मावली हजुरबुबा/हजुरआमा:</span> स्व. चूडाराज घिमिरे / श्रीमती घन कुमारी घिमिरे</div>
-        <div class="row"><span class="k">काका/काकी:</span> श्री यादव प्रसाद आचार्य / देवी आचार्य</div>
-        <div class="row"><span class="k">मामा/माइजु:</span> श्री नवराज घिमिरे / उर्मिला तिमल्सिना</div>
-        <div class="row"><span class="k">मामा/माइजु:</span> श्री शंकर घिमिरे / दुर्गा देवी दुलाल</div>
-        <div class="row"><span class="k">दाजु/भाउजु:</span> सुब्रत आचार्य / रचना काफ्ले</div>
-        <div class="row"><span class="k">भाइ/बुहारी:</span> सुरज आचार्य / शोभा ढकाल</div>
-        <div class="row"><span class="k">बैनी/ज्वाई:</span> सुमिना आचार्य / यादव घिमिरे</div>
-        <div class="row"><span class="k">छोरी:</span> अदिति आचार्य</div>
-        <div class="row"><span class="k">भान्जी:</span> न्यरा घिमिरे</div>
+        <div class="row">श्री ध्रुव प्रसाद आचार्य / श्रीमती मल्लिका आचार्य</div>
+        <div class="row">स्व. राम प्रसाद आचार्य / श्रीमती सावित्री आचार्य</div>
+        <div class="row">स्व. चूडाराज घिमिरे / श्रीमती घन कुमारी घिमिरे</div>
+        <div class="row">श्री यादव प्रसाद आचार्य / श्रीमती देवी आचार्य</div>
+        <div class="row">श्री दुर्गा प्रसाद काफ्ले / श्रीमती कल्याणी काफ्ले</div>
+        <div class="row">श्री शिव प्रसाद कोइराला / श्रीमती मीना कोइराला</div>
+        <div class="row">श्री नवराज घिमिरे / श्रीमती उर्मिला घिमिरे</div>
+        <div class="row">श्री शंकर घिमिरे / श्रीमती दुर्गा घिमिरे</div>
+        <div class="row">श्री सुब्रत आचार्य / श्रीमती रचना आचार्य</div>
+        <div class="row">श्री रमेश काफ्ले / श्रीमती बिन्दा काफ्ले</div>
+        <div class="row">श्री सुरज आचार्य / श्रीमती शोभा आचार्य</div>
+        <div class="row">श्री यादव घिमिरे / श्रीमती सुमिना घिमिरे</div>
+        <div class="row">सुश्री अदिति आचार्य</div>
+        <div class="row">सुश्री न्यरा घिमिरे</div>
         <div class="row" style="margin-top:6px; font-style:italic;">(एवं समस्त आचार्य परिवार)</div>
       </div>
 
@@ -1209,8 +1218,10 @@
 
       <div class="b7 block" style="animation-delay:9.0s" data-fade>
         <div class="hdr">प्रार्थी:</div>
-        <div class="name">श्री ध्रुव प्रसाद आचार्य</div>
-        <div class="name">श्रीमती मल्लिका आचार्य</div>
+        <div class="name">श्रीमती सावित्री आचार्य</div>
+        <div class="name">श्रीमती घन कुमारी घिमिरे</div>
+        <div class="name">श्री टंक नाथ काफ्ले</div>
+        <div class="name">श्रीमती लक्ष्मी देवी काफ्ले</div>
       </div>
 
     </section>
@@ -1505,14 +1516,24 @@
      8. MUSIC — local <audio> file with mute toggle.
      Starts muted on the envelope tap (the user gesture autoplay needs),
      then unmutes when the user taps the ♪ button.
-     To change track: replace music.mp3.mpeg in the project folder.
+     To change track: replace new_music.m4a in the project folder (or edit the
+     src on the <audio> tag near the top of the body).
      ============================================================ */
   const bgMusic   = document.getElementById('bgMusic');
   const musicBtn  = document.getElementById('musicToggle');
   const musicIcon = document.getElementById('musicIcon');
 
-  bgMusic.volume = 0.55;            // gentle background level
+  bgMusic.volume = 0.25;            // soft background level — not the main event
   bgMusic.muted  = true;            // muted so autoplay isn't blocked
+
+  // Loop only the first 2 minutes (saves listeners from a long track and
+  // keeps the ambient feel — when it reaches 120s, jump back to the start).
+  const MUSIC_LOOP_END_S = 120;
+  bgMusic.addEventListener('timeupdate', () => {
+    if (bgMusic.currentTime >= MUSIC_LOOP_END_S) {
+      bgMusic.currentTime = 0;
+    }
+  });
 
   function setMusicIcon(unmuted) {
     musicIcon.textContent = unmuted ? '♫' : '♪';
@@ -1542,7 +1563,7 @@
   });
 
   bgMusic.addEventListener('error', () => {
-    console.warn('[wedding] could not load music.mp3.mpeg — check file is in project folder');
+    console.warn('[wedding] could not load new_music.m4a — check file is in project folder');
   });
 
   /* ============================================================
